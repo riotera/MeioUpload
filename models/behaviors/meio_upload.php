@@ -165,12 +165,12 @@ class MeioUploadBehavior extends ModelBehavior {
 	var $__filesToRemove = array();
 
 /**
- * Array of all possible images that can be converted to thumbnails
+ * Array of all possible image extensions that can be converted to thumbnails
  *
  * @var array
  * @access protected
  */
-	var $_imageTypes = array('image/jpeg', 'image/pjpeg', 'image/png', 'image/gif', 'image/bmp', 'image/x-icon', 'image/vnd.microsoft.icon');
+	var $_imageExt = array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'ico');
 
 /**
  * Constructor
@@ -710,7 +710,7 @@ class MeioUploadBehavior extends ModelBehavior {
 				}
 
 				// If the file is an image, try to make the thumbnails
-				if ((count($options['thumbsizes']) > 0) && count($options['allowedExt']) > 0 && in_array($data[$model->alias][$fieldName]['type'], $this->_imageTypes)) {
+				if ((count($options['thumbsizes']) > 0) && count($options['allowedExt']) > 0 && $this->_checkImage($data[$model->alias][$fieldName])) {
 					$this->_createThumbnails($model, $data, $fieldName, $saveAs, $ext, $options);
 				}
 
@@ -771,7 +771,7 @@ class MeioUploadBehavior extends ModelBehavior {
 				}
 
 				// If the file is an image, try to make the thumbnails
-				if ((count($options['thumbsizes']) > 0) && count($options['allowedExt']) > 0 && in_array($data[$model->alias][$fieldName]['type'], $this->_imageTypes)) {
+				if ((count($options['thumbsizes']) > 0) && count($options['allowedExt']) > 0 && $this->_checkImage($data[$model->alias][$fieldName])) {
 					$this->_createThumbnails($model, $data, $fieldName, $saveAs, $ext, $options);
 				}
 
@@ -1275,4 +1275,16 @@ class MeioUploadBehavior extends ModelBehavior {
 	function _addError($msg) {
 		$this->errors[] = $msg;
 	}
+	
+/**
+ * Checks if file is an allowed image
+ *
+ * @param array $file 
+ * @return boolean
+ * @access protected
+ */
+	function _checkImage($file) {
+		$path = pathinfo($file['name']);
+		return getimagesize($file['tmp_name'])!== false && in_array($path['extension'], $this->_imageExt);
+	}	
 }
