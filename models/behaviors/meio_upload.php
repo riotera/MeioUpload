@@ -814,11 +814,7 @@ class MeioUploadBehavior extends ModelBehavior {
 				continue;
 			}
 		}
-		if (isset($result)) {
-			return $result;
-		} else {
-			return true;
-		}
+		return (isset($result)) ? $result : true;
 	}
 
 /**
@@ -1015,16 +1011,11 @@ class MeioUploadBehavior extends ModelBehavior {
 			$this->patterns[] = $newPattern;
 			$newReplacement = $newPattern;
 			if (isset($newReplacement[1])) {
-				if ($newReplacement[1] != '_') {
-					$newReplacement[1] = '_';
-				} else {
-					$newReplacement[1] = 'a';
-				}
-			} elseif ($newReplacement != '_') {
-				$newReplacement = '_';
+				$newReplacement[1] = ($newReplacement[1] != '_') ? '_' : 'a';
 			} else {
-				$newReplacement = 'a';
+				$newReplacement =  ($newReplacement != '_') ? '_' : 'a';
 			}
+
 			$this->replacements[] = $newReplacement;
 		}
 	}
@@ -1063,10 +1054,7 @@ class MeioUploadBehavior extends ModelBehavior {
 		}
 		// Otherwise, set the thumb filename to thumb.$key.$filename.$ext
 		$result = $dir . DS . $thumbDir . DS . $key . DS . $fieldToSaveAs;
-		if (isset($sub)) {
-			return $result . '.' . $sub;
-		}
-		return $result;
+		return (isset($sub)) ? $result . '.' . $sub : $result;
 	}
 
 /**
@@ -1197,11 +1185,8 @@ class MeioUploadBehavior extends ModelBehavior {
 			);
 			if ($this->__fields[$model->alias][$fieldName]['thumbnails'] && !empty($this->__fields[$model->alias][$fieldName]['thumbsizes'])) {
 				foreach($this->__fields[$model->alias][$fieldName]['thumbsizes'] as $key => $sizes){
-					if ($key === 'normal') {
-						$subpath = '';
-					} else {
-						$subpath = DS . $thumbDir . DS . $key;
-					}
+					$subpath = ($key === 'normal') ? '' : DS . $thumbDir . DS . $key;
+
 					$this->__filesToRemove[] = array(
 						'field' => $fieldName,
 						'dir' => $this->__fields[$model->alias][$fieldName]['dir'] . $subpath,
@@ -1225,11 +1210,8 @@ class MeioUploadBehavior extends ModelBehavior {
  */
 	function _markForDeletion(&$model, $fieldName, $data, $default, $thumbDir) {
 		if (!empty($data[$model->alias][$fieldName]['remove'])) {
-			if ($default) {
-				$data[$model->alias][$fieldName] = $default;
-			} else {
-				$data[$model->alias][$fieldName] = '';
-			}
+			$data[$model->alias][$fieldName] = ($default) ? $default : '';
+
 			//if the record is already saved in the database, set the existing file to be removed after the save is sucessfull
 			if (!empty($data[$model->alias][$model->primaryKey])) {
 				$this->_setFileToRemove($model, $fieldName, $thumbDir);
@@ -1270,10 +1252,7 @@ class MeioUploadBehavior extends ModelBehavior {
  * @return boolean
  */
 	function _removeOriginal($saveAs) {
-		if (is_file($saveAs) && unlink($saveAs)) {
-			return true;
-		}
-		return false;
+		return (is_file($saveAs) && unlink($saveAs));
 	}
 
 /**
@@ -1326,16 +1305,16 @@ class MeioUploadBehavior extends ModelBehavior {
 	function _addError($msg) {
 		$this->errors[] = $msg;
 	}
-	
+
 /**
  * Checks if file is an allowed image
  *
- * @param array $file 
+ * @param array $file
  * @return boolean
  * @access protected
  */
 	function _checkImage($file) {
 		$path = pathinfo($file['name']);
 		return getimagesize($file['tmp_name'])!== false && in_array($path['extension'], $this->_imageExt);
-	}	
+	}
 }
